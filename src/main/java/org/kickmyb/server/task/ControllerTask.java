@@ -62,8 +62,8 @@ public class ControllerTask {
         System.out.println("KICKB SERVER : Delete  with cookie ");
         ConfigHTTP.attenteArticifielle();
         MUser user = currentUser();
-        serviceTask.taskDelete(user.id,id);
-        return "ca marche";
+        serviceTask.taskDelete(user,id);
+        return "";
     }
 
     /**

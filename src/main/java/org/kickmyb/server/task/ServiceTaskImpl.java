@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Transactional
@@ -181,9 +182,11 @@ public class ServiceTaskImpl implements ServiceTask {
     }
 
     @Override
-    public void taskDelete(Long userID,Long id) {
-        MTask element = repo.findById(id).get();
+    public void taskDelete(MUser user,Long id) {
+        MTask element = user.tasks.stream().filter(elt -> Objects.equals(elt.id, id)).findFirst().get();
         repo.delete(element);
+        user.tasks.removeIf(t -> Objects.equals(t.id, id));
+
     }
 
 }
