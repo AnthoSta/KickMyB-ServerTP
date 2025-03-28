@@ -180,4 +180,10 @@ public class ServiceTaskImpl implements ServiceTask {
         return response;
     }
 
+    @Override
+    public void taskDelete(Long userID,Long id) {
+        MTask element = repo.findById(id).get();
+        repo.delete(element);
+    }
+
 }
