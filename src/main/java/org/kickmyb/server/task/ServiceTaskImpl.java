@@ -184,6 +184,9 @@ public class ServiceTaskImpl implements ServiceTask {
     @Override
     public void taskDelete(MUser user,Long id) {
         MTask element = user.tasks.stream().filter(elt -> Objects.equals(elt.id, id)).findFirst().get();
+        //List<MTask> e = user.tasks;
+        //e.stream().findFirst(aa -> aa.){
+        //MTask element = user.tasks.stream()..get(Math.toIntExact(id));
         repo.delete(element);
         user.tasks.removeIf(t -> Objects.equals(t.id, id));
 

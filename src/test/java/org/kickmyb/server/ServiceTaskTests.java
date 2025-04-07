@@ -16,6 +16,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -111,5 +113,35 @@ class ServiceTaskTests {
         } catch (Exception e) {
             assertEquals(ServiceTask.Existing.class, e.getClass());
         }
+    }
+
+    //Test delete
+    @Test
+    void testDeleteCorrectID() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        MUser u = new MUser();
+        u.username = "M. Test";
+        u.password = passwordEncoder.encode("Passw0rd!");
+        userRepository.saveAndFlush(u);
+
+        //Ajouter une tâche
+        AddTaskRequest atr = new AddTaskRequest();
+        atr.name = "Tâche de test";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3600));
+
+        serviceTask.addOne(atr, u);
+        //Vérifier qu'il a une tâche
+        assertEquals(1, serviceTask.home(u.id).size());
+        AddTaskRequest atr2 = new AddTaskRequest();
+        atr.name = "Tâche de test2";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3800));
+        serviceTask.addOne(atr, u);
+
+        MUser leUser = userRepository.findByUsername("M. Test").get();
+        //,leUser.tasks.getFirst().id
+
+        serviceTask.taskDelete(u,0L);
+
+        //Verifier que la tâche a été supprimé
+        assertEquals(1, serviceTask.home(u.id).size());
     }
 }
