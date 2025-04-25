@@ -6,6 +6,7 @@ import org.kickmyb.server.account.MUser;
 import org.kickmyb.server.account.MUserRepository;
 import org.kickmyb.server.task.ServiceTask;
 import org.kickmyb.transfer.AddTaskRequest;
+import org.kickmyb.transfer.HomeItemResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -121,6 +123,7 @@ class ServiceTaskTests {
         MUser u = new MUser();
         u.username = "M. Test";
         u.password = passwordEncoder.encode("Passw0rd!");
+
         userRepository.saveAndFlush(u);
 
         //Ajouter une tâche
@@ -132,16 +135,18 @@ class ServiceTaskTests {
         //Vérifier qu'il a une tâche
         assertEquals(1, serviceTask.home(u.id).size());
         AddTaskRequest atr2 = new AddTaskRequest();
-        atr.name = "Tâche de test2";
-        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3800));
-        serviceTask.addOne(atr, u);
+
+        //atr2.name = "24545343";
+        //atr2.deadline = Date.from(new Date().toInstant().plusSeconds(3800));
+        //serviceTask.addOne(atr2, u);
 
         MUser leUser = userRepository.findByUsername("M. Test").get();
         //,leUser.tasks.getFirst().id
+        HomeItemResponse task = serviceTask.home(leUser.id).getFirst();
 
-        serviceTask.taskDelete(u,0L);
+        serviceTask.taskDelete(leUser,task.id);
 
         //Verifier que la tâche a été supprimé
-        assertEquals(1, serviceTask.home(u.id).size());
+        assertEquals(0, serviceTask.home(leUser.id).size());
     }
 }

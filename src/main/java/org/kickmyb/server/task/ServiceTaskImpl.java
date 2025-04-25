@@ -189,7 +189,7 @@ public class ServiceTaskImpl implements ServiceTask {
         //MTask element = user.tasks.stream()..get(Math.toIntExact(id));
         repo.delete(element);
         user.tasks.removeIf(t -> Objects.equals(t.id, id));
-
+        repoUser.save(user);
     }
 
 }
