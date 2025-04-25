@@ -16,10 +16,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,5 +145,69 @@ class ServiceTaskTests {
 
         //Verifier que la tâche a été supprimé
         assertEquals(0, serviceTask.home(leUser.id).size());
+    }
+    @Test
+    void testDeleteIncorrectID() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        MUser u = new MUser();
+        u.username = "M. Test";
+        u.password = passwordEncoder.encode("Passw0rd!");
+
+        userRepository.saveAndFlush(u);
+
+        //Ajouter une tâche
+        AddTaskRequest atr = new AddTaskRequest();
+        atr.name = "Tâche de test";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3600));
+
+        serviceTask.addOne(atr, u);
+        //Vérifier qu'il a une tâche
+        assertEquals(1, serviceTask.home(u.id).size());
+
+        MUser leUser = userRepository.findByUsername("M. Test").get();
+        HomeItemResponse task = serviceTask.home(leUser.id).getFirst();
+        try{
+            serviceTask.taskDelete(leUser,task.id + 1);
+            fail("Aurait du lancer NoSuchElementException");
+        }
+        catch (Exception e){
+            assertEquals(NoSuchElementException.class, e.getClass());
+        }
+    }
+
+    @Test
+    void testDeleteControleAcces() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        //Création du User Alice
+        MUser alice = new MUser();
+        alice.username = "Alice";
+        alice.password = passwordEncoder.encode("Passw0rd!");
+
+        userRepository.saveAndFlush(alice);
+
+        //Ajouter une tâche
+        AddTaskRequest atr = new AddTaskRequest();
+        atr.name = "Une tache";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3600));
+
+        serviceTask.addOne(atr, alice);
+        //Vérifier qu'il a une tâche
+        assertEquals(1, serviceTask.home(alice.id).size());
+
+        //Création du user Bob
+        MUser bob = new MUser();
+        bob.username = "Bob";
+        bob.password = passwordEncoder.encode("Passw0rd!");
+
+        userRepository.saveAndFlush(bob);
+
+        MUser leUser = userRepository.findByUsername("Alice").get();
+        HomeItemResponse taskAlice = serviceTask.home(leUser.id).getFirst();
+        MUser leBob = userRepository.findByUsername("Bob").get();
+        try{
+            serviceTask.taskDelete(leBob,taskAlice.id);
+            fail("Aurait du lancer ????");
+        }
+        catch (Exception e){
+            assertEquals(NoSuchElementException.class, e.getClass());
+        }
     }
 }
